@@ -31,6 +31,7 @@
         exit(-1);                                         \
     } while (0)
 
+#ifdef MUDEBUG
 #define LOG_DEBUG(logmsgFormat, ...) \
     do { \
         Logger &logger = Logger::instance(); \
@@ -39,7 +40,9 @@
         snprintf(buf, 1024, logmsgFormat, ##__VA_ARGS__); \
         logger.log(buf); \
     } while(0)
-
+#else
+#define LOG_DEBUG(logmsgFormat, ...)
+#endif
 
 // 定义日志的级别 INFO  ERROR  FATAL  DEBUG
 enum LogLevel {

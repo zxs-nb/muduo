@@ -23,14 +23,35 @@ EpollPoller::~EpollPoller() { ::close(epollfd_); }
 
 //重写基类的抽象方法，EventLoop会把自己保存的vector<Channel*>传入Poll
 Timestamp EpollPoller::Poll(int timeoutMs, ChannelList* activeChannels) {
+    LOG_INFO("func=%s => fd total count:%zu\n", __FUNCTION__, channels_.size());
 
+    int numEvents = ::epoll_wait(epollfd_, events_.data(), static_cast<int>(events_.size()), timeoutMs);
+    int saveErrno = errno;
+    Timestamp now(Timestamp::now());
+    if (numEvents > 0) {
+        LOG_INFO("%d events happened \n", numEvents);
+        fillActiveChannels(numEvents, activeChannels);
+        if (numEvents == events_.size()) {
+            events_.resize(events_.size() * 2);
+        }
+    }
+    else if (numEvents == 0) {
+        LOG_DEBUG("%s timeout!\n", __FUNCTION__);
+    }
+    else {
+        if (saveErrno != EINTR) {
+            errno = saveErrno;
+            LOG_ERROR("EpollPoller Poll() error!");
+        }
+    }
+    return now;
 }
 
 //Channel更新关注的事件后向上层EventLoop报告后调用的更新函数
 void EpollPoller::updateChannel(Channel* channel) 
 {
     const int index = channel->index();
-    LOG_INFO("fd=%d events=%d index=%d \n", channel->fd(), channel->events(), index);
+    LOG_INFO("func=%s => fd=%d events=%d index=%d \n", __FUNCTION__, channel->fd(), channel->events(), index);
 
     if (index == kNew || index == kDeleted) {
         if (index == kNew)
@@ -56,6 +77,7 @@ void EpollPoller::updateChannel(Channel* channel)
 //当不关注任何事件了，即events==kNoneEvent
 void EpollPoller::removeChannel(Channel* channel)
 {
+    LOG_INFO("func=%s => fd=%d\n", __FUNCTION__, channel->fd());
     int fd = channel->fd();
     channels_.erase(fd);
 
@@ -69,7 +91,11 @@ void EpollPoller::removeChannel(Channel* channel)
 
 //填写活跃的连接，回填给EventLoop，让EventLoop来处理对应的回调
 void EpollPoller::fillActiveChannels(int numEvents, ChannelList* activeChannels) const {
-
+    for (int i = 0; i < numEvents; ++i) {
+        Channel *channel = static_cast<Channel *>(events_[i].data.ptr);
+        channel->setRevents(events_[i].events);
+        activeChannels->push_back(channel);//EventLoop就拿到了它的Poller给它返回的所有发生事件的channel列表了       
+    }
 }
 
 
