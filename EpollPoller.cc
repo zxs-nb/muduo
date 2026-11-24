@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 const int kNew = -1;  //Channel的成员index_，表示Channel未添加到Poller中
-const int kAdded = 1; //表示已添加到
+const int kAdded = 1; //表示已添加到ChannelMap和epoll监视列表中
 const int kDeleted = 2; //表示已从epoll的监听事件中删除,但还在channels_中
 
 EpollPoller::EpollPoller(EventLoop* loop)
@@ -15,7 +15,7 @@ EpollPoller::EpollPoller(EventLoop* loop)
     , events_(kInitEventListSize)
 {
     if (epollfd_ < 0) {
-        LOG_FATAL("epoll_create error:%d \n", errno);
+        LOG_FATAL("epoll_create1 error:%d \n", errno);
     }
 }
 

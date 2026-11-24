@@ -23,7 +23,7 @@ public:
     virtual void removeChannel(Channel*) = 0;
 
     //判断是否拥有某个Channel
-    bool hasChannel(Channel*) const;
+    bool hasChannel(Channel *) const;
 
     //Eventloop可以从该接口获取默认实现的IO多路复用的实现
     static Poller* newDefaultPoller(EventLoop* loop);
