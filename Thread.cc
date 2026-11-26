@@ -35,7 +35,7 @@ void Thread::start() {  //一个Thread对象，记录的是一个新线程的详
     sem_t sem;
     sem_init(&sem, 0, 0);
     //开启线程
-    thread_ = std::make_shared<std::thread>([&]() {
+    thread_ = std::make_unique<std::thread>([&]() {
         //获取线程id的值
         tid_ = CurrentThread::tid();
         //已经执行完了，增加一个信号量

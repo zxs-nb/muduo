@@ -17,7 +17,7 @@ const int kPollTimeMs = 10000;
 //调用eventfd函数创建eventfd，进行跨线程唤醒
 int createEventfd() {
     int eventFd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-    if (eventfd < 0) {
+    if (eventFd < 0) {
         LOG_FATAL("eventfd error:%d \n", errno);
     }
     return eventFd;
@@ -35,7 +35,7 @@ EventLoop::EventLoop()
     LOG_DEBUG("EventLoop create %p in thread %d \n", this, threadId_);
     if (t_loopInThisThread) 
     {
-        LOG_FATAL("Another EventLoop exists in this thread %d \n", t_loopInThisThread, threadId_);
+        LOG_FATAL("Another EventLoop %p exists in this thread %d \n", t_loopInThisThread, threadId_);
     }
     else 
     {
@@ -116,7 +116,7 @@ void EventLoop::handleRead()
     ssize_t n = ::read(wakeupFd_, &one, sizeof(one));
 
     if (n != sizeof(one)) {
-        LOG_ERROR("EventLoop::handleRead() reads %d bytes instead of 8", n);
+        LOG_ERROR("EventLoop::handleRead() reads %lu bytes instead of 8", n);
     }
 }
 
@@ -127,7 +127,7 @@ void EventLoop::wakeup()
     ssize_t n = ::write(wakeupFd_, &one, sizeof(one));
 
     if (n != sizeof(one)) {
-        LOG_ERROR("EventLoop::wakeup() writes %d bytes instead of 8", n);
+        LOG_ERROR("EventLoop::wakeup() writes %lu bytes instead of 8", n);
     }
 }
 
