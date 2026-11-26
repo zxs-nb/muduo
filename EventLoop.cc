@@ -109,7 +109,7 @@ void EventLoop::quit() {
     }
 }
 
-//wakeupFd_注册的读回调事件，将事件读出，用来防止？
+//wakeupFd_注册的读回调事件，将事件读出，用来防止未将计数器读完导致一直唤醒
 void EventLoop::handleRead()
 {
     uint64_t one = 1;
@@ -147,7 +147,7 @@ void EventLoop::queueInLoop(Functor cb) {
         std::unique_lock<std::mutex> lock(mutex_);
         pendingFunctors_.emplace_back(std::move(cb));
     }
-    //callingPendingFunctors_为true说明当前loop正在执行doPendingFunctors()回调，为了防止
+    //callingPendingFunctors_为true说明当前loop正在执行doPendingFunctors()回调
     if (!isInLoopThread() || callingPendingFunctors_) {
         wakeup();    //唤醒loop所在线程
     }
