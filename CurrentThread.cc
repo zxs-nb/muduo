@@ -2,7 +2,7 @@
 #include <syscall.h>
 #include <unistd.h>
 
-namespace 
+namespace CurrentThread
 {
     __thread int t_cachedTid = 0;
 

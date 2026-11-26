@@ -34,12 +34,12 @@ void Channel::tie(const std::shared_ptr<void>& obj) {
 //update负责在Poller里面更改fd相应的事件(epoll_ctl)
 void Channel::update() {
     // 通过Channel所属的EventLoop,调用poller的相应方法，注册fd的events事件
-    // loop_->updateChannel(this);
+    loop_->updateChannel(this);
 }
 
 //处理从拥有该Channel的EventLoop中删除该Channel
 void Channel::remove() {
-    // lope_->removeChannel(this);
+    loop_->removeChannel(this);
 }
 
 // fd得到poller通知以后，处理事件的
